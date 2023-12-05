@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd functions && tsc",
+    "serve": "npm run build -- --watch | firebase emulators:start"
   },
   "author": "",
   "license": "ISC",

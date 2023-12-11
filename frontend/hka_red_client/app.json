@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "hka_red_client",
-    "slug": "hka_red_client",
+    "name": "AwesomeProject",
+    "slug": "AwesomeProject",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -1,19 +1,76 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
+import express, {Request, Response} from "express";
 import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+import {initializeApp} from "firebase-admin/app";
+import {getFirestore} from "firebase-admin/firestore";
+import {setGlobalOptions} from "firebase-functions/v2/options";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+import {RedditLoader} from "./RedditLoader";
+import {isCollection, loadCollection} from "./collections";
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const app = express();
+initializeApp();
+setGlobalOptions({maxInstances: 10});
+const loader = new RedditLoader();
+
+app.get("/", (req: Request, res: Response) => {
+  // redirects are weird so instead we do nothing
+  res.send("please use r/something");
+});
+
+app.get("/:sub", async (req: Request, res: Response) => {
+  const sub = req.params.sub;
+  const limit: number = +(req.query.limit || 5);
+  const after: string | null = req.query.after ? `${req.query.after}` : null;
+
+  if (isCollection(sub)) {
+    return loadCollection(sub, req, res);
+  }
+
+  const subCollection = await getFirestore().collection(sub);
+
+  let afterDoc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData> | null = null;
+  let lastPosts: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> | null = null;
+
+  if (after) {
+    afterDoc = await subCollection.doc(after).get();
+    lastPosts = await subCollection.orderBy("created", "desc").startAfter(afterDoc).limit(limit).get();
+  } else {
+    lastPosts = await subCollection.orderBy("created", "desc").limit(limit).get();
+  }
+
+  let postData = lastPosts.docs.map((doc) => doc.data());
+
+  if (lastPosts.docs.length < limit) {
+    const added = await loader.loadSub(sub, limit - lastPosts.docs.length, after);
+    postData = postData.concat(added.children);
+  }
+
+  return res.json({
+    after: after || null,
+    children: postData,
+  });
+});
+
+app.get("/:sub/about", (req: Request, res: Response) => {
+  return res.send(`about ${req.params.sub}`);
+});
+
+app.get("/:sub/comments/:post", async (req: Request, res: Response) => {
+  const sub = req.params.sub;
+  const post = req.params.post;
+
+  const subCollection = await getFirestore().collection(sub);
+  const postDocument = await subCollection.doc(post).get();
+
+  if (!postDocument.exists) {
+    // TODO: Fetch
+  }
+
+  return res.json({
+    "content": "whatever",
+  });
+});
+
+exports.r = onRequest({
+  region: "europe-west3",
+}, app);

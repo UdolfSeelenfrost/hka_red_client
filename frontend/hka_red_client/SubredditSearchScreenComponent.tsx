@@ -1,4 +1,4 @@
-import {Text, View, StyleSheet, FlatList, TextInput} from "react-native";
+import {Text, View, StyleSheet, FlatList, TextInput, TouchableOpacity} from "react-native";
 import * as React from "react";
 import {useState, useEffect} from "react";
 import searchScreenComponent from "./SearchScreenComponent";
@@ -24,11 +24,11 @@ function SearchScreenComponent() {
             .then(json => json.data.children)
             .then(children => children.map(child =>
                 ({
-                "display_name" : child.data.display_name,
-                "subscribers" : child.data.subscribers,
-                "title" : child.data.title,
-                "url" : child.data.url
-            })
+                    "display_name" : child.data.display_name,
+                    "subscribers" : child.data.subscribers,
+                    "title" : child.data.title,
+                    "url" : child.data.url
+                })
             ))
             .then(children => setSubreddits(children))
             .catch(error => {
@@ -42,9 +42,17 @@ function SearchScreenComponent() {
 
     const ItemView = ({item}) => {
         return (
-            <Text style={styles.itemStyle}>
-                {item.display_name}{", "}{item.subscribers}
-            </Text>
+            <TouchableOpacity style={styles.button} >
+                <View style={styles.itemStyle}>
+                    <Text style={styles.subName}>
+                        {item.display_name}
+                    </Text>
+                    <Text >
+                        {item.subscribers}{" subscribers"}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+
         )
     }
 
@@ -69,7 +77,7 @@ function SearchScreenComponent() {
                 <FlatList
                     data={subreddits}
                     keyExtractor={(item, index) => index.toString()}
-                    ItemSeparatorComponent={ItemSeperatorView}
+                    //ItemSeparatorComponent={ItemSeperatorView}
                     renderItem={ItemView}
                 />
             </View>
@@ -79,7 +87,7 @@ function SearchScreenComponent() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
+        backgroundColor: '#4d4c4c',
     },
     itemStyle: {
         padding: 10,
@@ -90,8 +98,17 @@ const styles = StyleSheet.create({
         borderColor: "#1239ab",
         margin: 5,
         paddingLeft: 20,
-        backgroundColor: "white"
-
+        backgroundColor: "white",
+        borderRadius: 10
+    },
+    subName: {
+        fontWeight: "bold",
+        fontSize: 15
+    },
+    button: {
+        backgroundColor: '#ffffff',
+        padding: 2,
+        margin: 4
     }
 });
 

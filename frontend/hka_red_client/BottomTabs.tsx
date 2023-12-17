@@ -33,7 +33,7 @@ function MyTabs() {
         <Tab.Navigator>
         <Tab.Screen name="Home" component={HomeScreen}
                     options={{
-                        tabBarLabel: 'Home',
+                        tabBarShowLabel: false,
                         tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons name="home" color={color} size={size} />
                         ),
@@ -41,7 +41,7 @@ function MyTabs() {
         />
         <Tab.Screen name="Search" component={SubredditSearchScreenComponent}
                     options={{
-                        tabBarLabel: 'Search',
+                        tabBarShowLabel: false,
                         tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons name="magnify" color={color} size={size} />
                         ),
@@ -49,7 +49,7 @@ function MyTabs() {
         />
             <Tab.Screen name="Notifications" component={NotificationScreen}
                         options={{
-                            tabBarLabel: 'Notifications',
+                            tabBarShowLabel: false,
                             tabBarIcon: ({ color, size }) => (
                                 <MaterialCommunityIcons name="bell" color={color} size={size} />
                             ),

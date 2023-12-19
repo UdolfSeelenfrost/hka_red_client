@@ -1,7 +1,9 @@
-import {Text, View, StyleSheet, FlatList, TextInput, TouchableOpacity} from "react-native";
+import {Text, View, StyleSheet, FlatList, TextInput, TouchableOpacity, Button} from "react-native";
 import * as React from "react";
 import {useState, useEffect} from "react";
-import searchScreenComponent from "./SearchScreenComponent";
+import { useNavigation } from '@react-navigation/native';
+
+import searchScreenComponent from "./oldShit/SearchScreenComponent";
 
 type Subreddit = {
     display_name: string;
@@ -10,10 +12,9 @@ type Subreddit = {
     url: string;
 }
 
-function SearchScreenComponent() {
+function SearchScreenComponent({ navigation }) {
     const [subreddits, setSubreddits] = useState([]);
     const [search, setSearch] = useState("")
-
 
     const fetchSubreddits = (searchTerm) => {
 
@@ -34,15 +35,16 @@ function SearchScreenComponent() {
             .catch(error => {
                 console.log(error)
             })
-
-
-        console.log(subreddits)
-
     }
 
     const ItemView = ({item}) => {
+
         return (
-            <TouchableOpacity style={styles.button} >
+            <TouchableOpacity style={styles.button} onPress={() => {
+                navigation.navigate('Home', {
+                    subredditName: item.display_name,
+                });
+            }}>
                 <View style={styles.itemStyle}>
                     <Text style={styles.subName}>
                         {item.display_name}
@@ -56,15 +58,6 @@ function SearchScreenComponent() {
         )
     }
 
-    const ItemSeperatorView = () => {
-        return (
-            <View
-                style={{height: 1.5, width: "100%", backgroundColor: "#0035ea"}}
-            />
-        )
-    }
-
-
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.container}>
@@ -77,7 +70,6 @@ function SearchScreenComponent() {
                 <FlatList
                     data={subreddits}
                     keyExtractor={(item, index) => index.toString()}
-                    //ItemSeparatorComponent={ItemSeperatorView}
                     renderItem={ItemView}
                 />
             </View>

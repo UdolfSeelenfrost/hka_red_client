@@ -20,16 +20,17 @@ export class RedditLoader {
     const fetchOptions = {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + await this.auth.getAccessToken(),
+        "Authorization": "bearer " + await this.auth.getAccessToken(),
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/t-to4st)",
       },
     };
 
     const fetchresult = await fetch(url, fetchOptions);
 
     if (!fetchresult.ok) {
-      logger.log(fetchresult.status.toString());
-      logger.log(fetchresult.statusText.toString());
-      logger.log(await fetchresult.text());
+      logger.log("Loader: " + fetchresult.status.toString());
+      logger.log("Loader: " + fetchresult.statusText.toString());
+      logger.log("Loader: " + await fetchresult.text());
       return {children: []};
     }
 

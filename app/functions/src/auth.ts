@@ -1,5 +1,8 @@
-import "dotenv/config";
+import {defineString} from "firebase-functions/params";
 import {logger} from "firebase-functions/v1";
+
+const clientId = defineString("CLIENT_ID");
+const clientSecret = defineString("CLIENT_SECRET");
 
 class AuthHandler {
   private static instance: AuthHandler;
@@ -19,13 +22,15 @@ class AuthHandler {
       headers: {
         "Content-Type": "application/json",
         "Authorization":
-          "Basic " + Buffer.from(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET).toString("base64"),
+          "Basic " + Buffer.from(clientId.value() + ":" + clientSecret.value()).toString("base64"),
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/t-to4st)",
       },
     });
 
     if (!result.ok) {
-      logger.log(result.status.toString());
-      logger.log(result.statusText.toString());
+      logger.log("Auth: " + result.status.toString());
+      logger.log("Auth: " + result.statusText.toString());
+      logger.log("Auth clientId: " + clientId.value());
       logger.log(await result.text());
       return;
     }

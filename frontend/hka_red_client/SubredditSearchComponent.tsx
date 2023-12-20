@@ -1,16 +1,6 @@
 import {Text, View, StyleSheet, FlatList, TextInput, TouchableOpacity, Button} from "react-native";
 import * as React from "react";
 import {useState, useEffect} from "react";
-import { useNavigation } from '@react-navigation/native';
-
-import searchScreenComponent from "./oldShit/SearchScreenComponent";
-
-type Subreddit = {
-    display_name: string;
-    subscribers: number;
-    title: string;
-    url: string;
-}
 
 function SearchScreenComponent({ navigation }) {
     const [subreddits, setSubreddits] = useState([]);

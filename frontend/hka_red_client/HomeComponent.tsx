@@ -1,4 +1,4 @@
-import {FlatList, Image, StyleSheet, Text, TextInput, View} from "react-native";
+import {FlatList, Image, Pressable, StyleSheet, Text, TextInput, View} from "react-native";
 import * as React from "react";
 import {useEffect, useState} from "react";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,11 +8,44 @@ function HomeScreen({route, navigation}) {
     const { subredditName } = route.params;
     const [posts, setPosts] = useState([]);
 
+    const [upvotedPosts, setUpvotedPosts] = useState([])
+    const [downvotedPosts, setDownvotedPosts] = useState([])
+
+
     useEffect(() => {
         fetchPosts(subredditName)
     }, [subredditName]);
 
     const ItemView = ({item}) => {
+
+        const isUpvoted = (item) => {
+            if(upvotedPosts.includes(item.name)){
+                setUpvotedPosts(upvotedPosts.filter(post => post !== item.name));
+                return;
+            }
+
+            if(downvotedPosts.includes(item.name)){
+                setDownvotedPosts(downvotedPosts.filter(post => post !== item.name));
+            }
+
+            setUpvotedPosts(upvotedPosts => [...upvotedPosts, item.name])
+        }
+
+        const isDownvoted = (item) => {
+            if(downvotedPosts.includes(item.name)){
+                setDownvotedPosts(downvotedPosts.filter(post => post !== item.name));
+                return;
+            }
+
+            if(upvotedPosts.includes(item.name)){
+                setUpvotedPosts(upvotedPosts.filter(post => post !== item.name));
+            }
+
+            setDownvotedPosts(downvotedPosts => [...downvotedPosts, item.name])
+        }
+
+
+
         return (
             <View style={styles.postContainer}>
                 <View style={styles.postTopPartContainer}>
@@ -26,9 +59,13 @@ function HomeScreen({route, navigation}) {
                 </View>
                 <View style={styles.postBottomPartContainer}>
                     <View  style={{flexDirection: "row"}} >
-                        <MaterialCommunityIcons name="arrow-up-circle-outline" color={"#e00c0c"} size={28} />
+                        <Pressable onPress={() => isUpvoted(item)}>
+                            <MaterialCommunityIcons name="arrow-up-circle-outline" color={upvotedPosts.includes(item.name) ? "#e00c0c" : "#000000"} size={28} />
+                        </Pressable>
                         <Text style={{paddingTop: 4}}>{item.score}</Text>
-                        <MaterialCommunityIcons name="arrow-down-circle-outline" color={"#000000"} size={28} />
+                        <Pressable onPress={() => isDownvoted(item)}>
+                            <MaterialCommunityIcons name="arrow-down-circle-outline" color={downvotedPosts.includes(item.name) ? "#e00c0c" : "#000000"} size={28} />
+                        </Pressable>
                     </View>
                     <View style={{flexDirection: "row"}}>
                         <MaterialCommunityIcons name="comment-outline" color={"#000000"} size={28} />
@@ -46,11 +83,7 @@ function HomeScreen({route, navigation}) {
 
         const apiUrl = "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase();
 
-        console.log(apiUrl)
-
         fetch(apiUrl)
-            //.then(response => response.json())
-            //.then(json => console.log(json))
             .then(response => response.json())
             .then(json => json.children)
             .then(children => children.map(child =>
@@ -61,8 +94,9 @@ function HomeScreen({route, navigation}) {
                     "score" : child.score,
                     "permalink" : child.permalink,
                     "num_comments" : child.num_comments,
-                    "created": Math.trunc(parseFloat(child.created) / 1000 / 3600),
+                    "created": Math.trunc(((Date.now()/1000) - parseFloat(child.created)) / 60 / 60),
                     "thumbnail": "https://b.thumbs.redditmedia.com/bPmSoIk89dnWGWKrUmbzPfmgF4HA0yMJ6jDV2knTp7U.jpg",
+                    "name" : child.name,
                 })
             ))
             .then(children => setPosts(children))
@@ -70,7 +104,6 @@ function HomeScreen({route, navigation}) {
                 console.log(error)
             })
 
-        console.log(posts)
     }
 
     const ItemSeperatorView = () => {
@@ -132,7 +165,7 @@ const styles = StyleSheet.create({
     postBottomPartContainer: {
         paddingTop: 2,
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-around"
     },
     postContainer: {
         padding: 10,

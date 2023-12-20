@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator();
 function MyTabs() {
     return (
         <Tab.Navigator initialRouteName={"Home"}>
-        <Tab.Screen name="Home" component={HomeScreen} initialParams={{subredditName: "r/all"}}
+        <Tab.Screen name="Home" component={HomeScreen} initialParams={{subredditName: "r/askreddit"}}
                     options={{
                         tabBarShowLabel: false,
                         tabBarIcon: ({ color, size }) => (

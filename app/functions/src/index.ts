@@ -1,3 +1,4 @@
+// @ts-ignore
 import express, {Request, Response} from "express";
 import {onRequest} from "firebase-functions/v2/https";
 import {initializeApp} from "firebase-admin/app";

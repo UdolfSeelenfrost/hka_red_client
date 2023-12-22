@@ -23,7 +23,7 @@ class AuthHandler {
         "Content-Type": "application/json",
         "Authorization":
           "Basic " + Buffer.from(clientId.value() + ":" + clientSecret.value()).toString("base64"),
-        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/t-to4st)",
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/udolf_seelenfrost)",
       },
     });
 

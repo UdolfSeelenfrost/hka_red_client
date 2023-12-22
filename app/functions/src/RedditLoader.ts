@@ -21,7 +21,7 @@ export class RedditLoader {
       headers: {
         "Content-Type": "application/json",
         "Authorization": "bearer " + await this.auth.getAccessToken(),
-        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/t-to4st)",
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/udolf_seelenfrost)",
       },
     };
 

@@ -1,5 +1,6 @@
 import {getFirestore} from "firebase-admin/firestore";
 import {logger} from "firebase-functions/v1";
+import {authHandler} from "./auth";
 
 const IMPORTANT_VALUES = [
   "before", "after", "children", "kind", "data", "subreddit", "author_fullname", "title", "name", "ups", "downs",
@@ -8,8 +9,10 @@ const IMPORTANT_VALUES = [
 ];
 
 export class RedditLoader {
+  private auth = authHandler;
+
   async loadSub(subName: string, limit = 5, after: string | null = null) {
-    let url = `http://api.reddit.com/r/${subName}?limit=${limit}`;
+    let url = `http://oauth.reddit.com/r/${subName}?limit=${limit}`;
     if (after) {
       url += `&after=${after}`;
     }
@@ -17,15 +20,17 @@ export class RedditLoader {
     const fetchOptions = {
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "bearer " + await this.auth.getAccessToken(),
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/udolf_seelenfrost)",
       },
     };
 
     const fetchresult = await fetch(url, fetchOptions);
 
     if (!fetchresult.ok) {
-      logger.log(fetchresult.status.toString());
-      logger.log(fetchresult.statusText.toString());
-      logger.log(await fetchresult.text());
+      logger.log("Loader: " + fetchresult.status.toString());
+      logger.log("Loader: " + fetchresult.statusText.toString());
+      logger.log("Loader: " + await fetchresult.text());
       return {children: []};
     }
 

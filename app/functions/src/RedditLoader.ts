@@ -5,7 +5,7 @@ import {authHandler} from "./auth";
 const IMPORTANT_VALUES = [
   "before", "after", "children", "kind", "data", "subreddit", "author_fullname", "title", "name", "ups", "downs",
   "score", "thumbnail", "created", "pinned", "over_18", "preview", "images", "subreddit_id", "author", "num_comments",
-  "permalink", "media", "url", "source", "width", "height",
+  "permalink", "media", "url", "source", "width", "height", "replies", "parent_id", "body"
 ];
 
 export class RedditLoader {
@@ -45,6 +45,53 @@ export class RedditLoader {
     }
 
     return result.data;
+  }
+
+  async loadComments(subName: string, postName: string, limit = 10, depth = 3) {
+    let url = `http://oauth.reddit.com/r/${subName}/comments/${postName}?limit=${limit}&depth=${depth}`;
+
+    const fetchOptions = {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "bearer " + await this.auth.getAccessToken(),
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/udolf_seelenfrost)",
+      },
+    };
+
+    const fetchresult = await fetch(url, fetchOptions);
+
+    if (!fetchresult.ok) {
+      logger.log(fetchresult.status.toString());
+      logger.log(fetchresult.statusText.toString());
+      logger.log(await fetchresult.text());
+      return {children: []};
+    }
+
+    let result = await fetchresult.json();
+    result = this.filter(result);
+
+    const postDoc = await getFirestore().collection(subName).doc(`t3_${postName}`),
+      commentsCollection = postDoc.collection("comments"),
+      loadedComments = [];
+
+    if ((await postDoc.get()).data() === undefined) {
+      await postDoc.set(result[0].data.children[0].data);
+    }
+
+    for (const comment of result[1].data.children) {
+      if (comment.kind === "more" /* TODO: avoid duplicates */) {
+        await postDoc.set({replies: comment.data}, {merge: true});
+      } else {
+        comment.data.storedAt = Date.now();
+        await commentsCollection.doc(comment.data.name).set(comment.data);
+        loadedComments.push(comment.data);
+      }
+    }
+
+    return {
+      post: (await postDoc.get()).data(),
+      children: loadedComments
+    };
   }
 
   private filter(response: object): object {

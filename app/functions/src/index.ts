@@ -7,6 +7,7 @@ import {setGlobalOptions} from "firebase-functions/v2/options";
 
 import {RedditLoader} from "./RedditLoader";
 import {isCollection, loadCollection} from "./collections";
+import { logger } from "firebase-functions/v1";
 
 const app = express();
 initializeApp();
@@ -61,14 +62,23 @@ app.get("/:sub/comments/:post", async (req: Request, res: Response) => {
   const post = req.params.post;
 
   const subCollection = await getFirestore().collection(sub);
-  const postDocument = await subCollection.doc(post).get();
+  const postDocument = subCollection.doc(`t3_${post}`);
 
-  if (!postDocument.exists) {
-    // TODO: Fetch
+  
+
+  const commentsDocs = (await postDocument.collection('comments').get()).docs;
+  if (commentsDocs.length === 0) {
+    const loaded = await loader.loadComments(sub, post);
+
+    return res.json({
+      post: (await postDocument.get()).data(),
+      children: loaded.children,
+    });
   }
 
   return res.json({
-    "content": "whatever",
+    post: (await postDocument.get()).data(),
+    children: commentsDocs.map((doc) => doc.data()),
   });
 });
 

@@ -1,19 +1,10 @@
-import {Text, View, StyleSheet, FlatList, TextInput} from "react-native";
+import {Text, View, StyleSheet, FlatList, TextInput, TouchableOpacity, Button} from "react-native";
 import * as React from "react";
 import {useState, useEffect} from "react";
-import searchScreenComponent from "./SearchScreenComponent";
 
-type Subreddit = {
-    display_name: string;
-    subscribers: number;
-    title: string;
-    url: string;
-}
-
-function SearchScreenComponent() {
+function SearchScreenComponent({ navigation }) {
     const [subreddits, setSubreddits] = useState([]);
     const [search, setSearch] = useState("")
-
 
     const fetchSubreddits = (searchTerm) => {
 
@@ -24,38 +15,38 @@ function SearchScreenComponent() {
             .then(json => json.data.children)
             .then(children => children.map(child =>
                 ({
-                "display_name" : child.data.display_name,
-                "subscribers" : child.data.subscribers,
-                "title" : child.data.title,
-                "url" : child.data.url
-            })
+                    "display_name" : child.data.display_name,
+                    "subscribers" : child.data.subscribers,
+                    "title" : child.data.title,
+                    "url" : child.data.url
+                })
             ))
             .then(children => setSubreddits(children))
             .catch(error => {
                 console.log(error)
             })
-
-
-        console.log(subreddits)
-
     }
 
     const ItemView = ({item}) => {
+
         return (
-            <Text style={styles.itemStyle}>
-                {item.display_name}{", "}{item.subscribers}
-            </Text>
+            <TouchableOpacity style={styles.button} onPress={() => {
+                navigation.navigate('Home', {
+                    subredditName: item.display_name,
+                });
+            }}>
+                <View style={styles.itemStyle}>
+                    <Text style={styles.subName}>
+                        {item.display_name}
+                    </Text>
+                    <Text >
+                        {item.subscribers}{" subscribers"}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+
         )
     }
-
-    const ItemSeperatorView = () => {
-        return (
-            <View
-                style={{height: 1.5, width: "100%", backgroundColor: "#0035ea"}}
-            />
-        )
-    }
-
 
     return (
         <View style={{ flex: 1 }}>
@@ -69,7 +60,6 @@ function SearchScreenComponent() {
                 <FlatList
                     data={subreddits}
                     keyExtractor={(item, index) => index.toString()}
-                    ItemSeparatorComponent={ItemSeperatorView}
                     renderItem={ItemView}
                 />
             </View>
@@ -79,7 +69,7 @@ function SearchScreenComponent() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
+        backgroundColor: '#4d4c4c',
     },
     itemStyle: {
         padding: 10,
@@ -90,8 +80,17 @@ const styles = StyleSheet.create({
         borderColor: "#1239ab",
         margin: 5,
         paddingLeft: 20,
-        backgroundColor: "white"
-
+        backgroundColor: "white",
+        borderRadius: 10
+    },
+    subName: {
+        fontWeight: "bold",
+        fontSize: 15
+    },
+    button: {
+        backgroundColor: '#ffffff',
+        padding: 2,
+        margin: 4
     }
 });
 

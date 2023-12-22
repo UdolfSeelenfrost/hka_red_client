@@ -3,45 +3,28 @@ import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import SearchScreenComponent from "./SearchScreenComponent";
-import SubredditSearchScreenComponent from "./SubredditSearchScreenComponent";
+import SearchScreenComponent from "./oldShit/SearchScreenComponent";
+import SubredditSearchComponent from "./SubredditSearchComponent";
+import HomeScreen from "./HomeComponent";
+import NotificationScreen from "./NotificationComponent";
 
-
-
-function HomeScreen() {
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Home!</Text>
-        </View>
-    );
-}
-
-
-
-function NotificationScreen() {
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Notifications!</Text>
-        </View>
-    );
-}
 
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
     return (
-        <Tab.Navigator>
-        <Tab.Screen name="Home" component={HomeScreen}
+        <Tab.Navigator initialRouteName={"Home"}>
+        <Tab.Screen name="Home" component={HomeScreen} initialParams={{subredditName: "r/askreddit"}}
                     options={{
-                        tabBarLabel: 'Home',
+                        tabBarShowLabel: false,
                         tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons name="home" color={color} size={size} />
                         ),
                     }}
         />
-        <Tab.Screen name="Search" component={SubredditSearchScreenComponent}
+        <Tab.Screen name="Search" component={SubredditSearchComponent}
                     options={{
-                        tabBarLabel: 'Search',
+                        tabBarShowLabel: false,
                         tabBarIcon: ({ color, size }) => (
                             <MaterialCommunityIcons name="magnify" color={color} size={size} />
                         ),
@@ -49,7 +32,8 @@ function MyTabs() {
         />
             <Tab.Screen name="Notifications" component={NotificationScreen}
                         options={{
-                            tabBarLabel: 'Notifications',
+
+                            tabBarShowLabel: false,
                             tabBarIcon: ({ color, size }) => (
                                 <MaterialCommunityIcons name="bell" color={color} size={size} />
                             ),

@@ -62,17 +62,23 @@ app.get("/:sub/comments/:post", async (req: Request, res: Response) => {
   const post = req.params.post;
 
   const subCollection = await getFirestore().collection(sub);
-  const postData = subCollection.doc(`t3_${post}`);
+  const postDocument = subCollection.doc(`t3_${post}`);
 
-  if ((await postData.collection('comments').get()).docs.length <= 0) {
+  
+
+  const commentsDocs = (await postDocument.collection('comments').get()).docs;
+  if (commentsDocs.length === 0) {
     const loaded = await loader.loadComments(sub, post);
-    return res.json(loaded);
+
+    return res.json({
+      post: (await postDocument.get()).data(),
+      children: loaded.children,
+    });
   }
-  logger.log("got comments");
 
   return res.json({
-    post: (await postData.get()).data(),
-    children: (await postData.collection('comments').get()).docs.map((doc) => doc.data()),
+    post: (await postDocument.get()).data(),
+    children: commentsDocs.map((doc) => doc.data()),
   });
 });
 

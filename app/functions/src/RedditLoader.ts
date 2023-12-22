@@ -47,12 +47,14 @@ export class RedditLoader {
     return result.data;
   }
 
-  async loadComments(subName: string, postName: string, limit = 5, depth = 3) {
-    let url = `http://api.reddit.com/r/${subName}/comments/${postName}?limit=${limit}&depth=${depth}`;
+  async loadComments(subName: string, postName: string, limit = 10, depth = 3) {
+    let url = `http://oauth.reddit.com/r/${subName}/comments/${postName}?limit=${limit}&depth=${depth}`;
 
     const fetchOptions = {
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "bearer " + await this.auth.getAccessToken(),
+        "User-Agent": "firebase:redditclient-80ec9:v0.1 (by /u/udolf_seelenfrost)",
       },
     };
 
@@ -72,11 +74,13 @@ export class RedditLoader {
       commentsCollection = postDoc.collection("comments"),
       loadedComments = [];
 
-    logger.log(url);
-    logger.log(result);
+    if ((await postDoc.get()).data() === undefined) {
+      await postDoc.set(result[0].data.children[0].data);
+    }
+
     for (const comment of result[1].data.children) {
       if (comment.kind === "more" /* TODO: avoid duplicates */) {
-        await commentsCollection.doc("moreComments").set(comment.data.children);
+        await postDoc.set({replies: comment.data}, {merge: true});
       } else {
         comment.data.storedAt = Date.now();
         await commentsCollection.doc(comment.data.name).set(comment.data);

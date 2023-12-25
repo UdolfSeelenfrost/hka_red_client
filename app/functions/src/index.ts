@@ -21,7 +21,7 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/:sub", async (req: Request, res: Response) => {
   const sub = req.params.sub;
   const limit: number = +(req.query.limit || 5);
-  const after: string | null = req.query.after ? `${req.query.after}` : null;
+  const after: string | null = req.query.after ? `t3_${req.query.after}` : null;
 
   if (isCollection(sub)) {
     return loadCollection(sub, req, res);
@@ -34,9 +34,12 @@ app.get("/:sub", async (req: Request, res: Response) => {
 
   if (after) {
     afterDoc = await subCollection.doc(after).get();
-    lastPosts = await subCollection.orderBy("created", "desc").startAfter(afterDoc).limit(limit).get();
+  }
+
+  if (afterDoc?.exists) {
+    lastPosts = await subCollection.orderBy("storedAt", "asc").startAfter(afterDoc).limit(limit).get();
   } else {
-    lastPosts = await subCollection.orderBy("created", "desc").limit(limit).get();
+    lastPosts = await subCollection.orderBy("storedAt", "asc").limit(limit).get();
   }
 
   let postData = lastPosts.docs.map((doc) => doc.data());

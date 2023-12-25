@@ -1,4 +1,3 @@
-// @ts-ignore
 import express, {Request, Response} from "express";
 import {onRequest} from "firebase-functions/v2/https";
 import {initializeApp} from "firebase-admin/app";
@@ -7,7 +6,7 @@ import {setGlobalOptions} from "firebase-functions/v2/options";
 
 import {RedditLoader} from "./RedditLoader";
 import {isCollection, loadCollection} from "./collections";
-import { logger } from "firebase-functions/v1";
+import {app as mockApp} from "./mockData";
 
 const app = express();
 initializeApp();
@@ -64,9 +63,7 @@ app.get("/:sub/comments/:post", async (req: Request, res: Response) => {
   const subCollection = await getFirestore().collection(sub);
   const postDocument = subCollection.doc(`t3_${post}`);
 
-  
-
-  const commentsDocs = (await postDocument.collection('comments').get()).docs;
+  const commentsDocs = (await postDocument.collection("comments").get()).docs;
   if (commentsDocs.length === 0) {
     const loaded = await loader.loadComments(sub, post);
 
@@ -85,3 +82,7 @@ app.get("/:sub/comments/:post", async (req: Request, res: Response) => {
 exports.r = onRequest({
   region: "europe-west3",
 }, app);
+
+exports.mock = onRequest({
+  region: "europe-west3",
+}, mockApp);

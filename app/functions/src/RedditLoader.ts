@@ -5,7 +5,7 @@ import {authHandler} from "./auth";
 const IMPORTANT_VALUES = [
   "before", "after", "children", "kind", "data", "subreddit", "author_fullname", "title", "name", "ups", "downs",
   "score", "thumbnail", "created", "pinned", "over_18", "preview", "images", "subreddit_id", "author", "num_comments",
-  "permalink", "media", "url", "source", "width", "height", "replies", "parent_id", "body"
+  "permalink", "media", "url", "source", "width", "height", "replies", "parent_id", "body",
 ];
 
 export class RedditLoader {
@@ -48,7 +48,7 @@ export class RedditLoader {
   }
 
   async loadComments(subName: string, postName: string, limit = 10, depth = 3) {
-    let url = `http://oauth.reddit.com/r/${subName}/comments/${postName}?limit=${limit}&depth=${depth}`;
+    const url = `http://oauth.reddit.com/r/${subName}/comments/${postName}?limit=${limit}&depth=${depth}`;
 
     const fetchOptions = {
       headers: {
@@ -70,9 +70,9 @@ export class RedditLoader {
     let result = await fetchresult.json();
     result = this.filter(result);
 
-    const postDoc = await getFirestore().collection(subName).doc(`t3_${postName}`),
-      commentsCollection = postDoc.collection("comments"),
-      loadedComments = [];
+    const postDoc = await getFirestore().collection(subName).doc(`t3_${postName}`);
+    const commentsCollection = postDoc.collection("comments");
+    const loadedComments = [];
 
     if ((await postDoc.get()).data() === undefined) {
       await postDoc.set(result[0].data.children[0].data);
@@ -90,7 +90,7 @@ export class RedditLoader {
 
     return {
       post: (await postDoc.get()).data(),
-      children: loadedComments
+      children: loadedComments,
     };
   }
 

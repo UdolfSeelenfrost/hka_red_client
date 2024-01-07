@@ -138,21 +138,6 @@ function HomeScreen({ route, navigation }) {
         console.log(error);
       });
 
-    // setPosts([
-    //   {
-    //     author: "child.author",
-    //     title: "child.title",
-    //     score: "558",
-    //     permalink: "child.permalink",
-    //     num_comments: "15",
-    //     subreddit_id: "t5_2qjpg",
-    //     subreddit: "askreddit",
-    //     created: Math.trunc((Date.now() / 1000 - parseFloat("5")) / 60 / 60),
-    //     thumbnail:
-    //       "https://b.thumbs.redditmedia.com/bPmSoIk89dnWGWKrUmbzPfmgF4HA0yMJ6jDV2knTp7U.jpg",
-    //     name: "child.name",
-    //   },
-    // ]);
   };
 
   const ItemSeperatorView = () => {

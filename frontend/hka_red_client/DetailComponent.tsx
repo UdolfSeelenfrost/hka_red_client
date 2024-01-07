@@ -136,10 +136,12 @@ function DetailComponent({ route, navigation }) {
           u/{currentPost.author} • {currentPost.created}h
         </Text>
         <Text style={styles.title}>{currentPost.title}</Text>
-        <Image
-          source={{ uri: currentPost.thumbnail }}
-          style={styles.thumbnail}
-        ></Image>
+        {!!currentPost.thumbnail && (
+          <Image
+            source={{ uri: currentPost.thumbnail }}
+            style={styles.thumbnail}
+          ></Image>
+        )}
       </View>
       <View style={styles.postBottomPartContainer}>
         <View style={{ flexDirection: "row" }}>
@@ -189,6 +191,7 @@ function DetailComponent({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
+    flex: 1
   },
   authorAge: {
     color: "#575656",
@@ -210,11 +213,10 @@ const styles = StyleSheet.create({
   },
   postTopPartContainer: {
     width: "100%",
-    height: "30%",
   },
   postBottomPartContainer: {
     width: "100%",
-    paddingTop: 2,
+    paddingTop: 5,
     flexDirection: "row",
     justifyContent: "space-around",
     height: "10%",
@@ -223,6 +225,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     height: "60%",
+    flex: 1
   },
   commentAuthor: {
     fontSize: 18,

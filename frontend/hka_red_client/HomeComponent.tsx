@@ -26,7 +26,6 @@ function HomeScreen({ route, navigation }) {
   useEffect(() => {
     fetchPosts(subredditName).then((loadedPosts) => {
       setPosts(loadedPosts)
-      console.log(loadedPosts)
       if(loadedPosts.length !== 0)
         setLastPostID(loadedPosts[loadedPosts.length - 1].name)
     })
@@ -124,14 +123,11 @@ function HomeScreen({ route, navigation }) {
 
   const fetchPosts = async (subredditName: String, afterID?: number) => {
     let apiUrl =
-        "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase() + "?limit=10";
-
+        "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase() + "?limit=25";
 
     if(typeof afterID !== 'undefined'){
         apiUrl = apiUrl + "&after=" + afterID
     }
-
-    console.log("url: " + apiUrl)
 
     try {
       const response = await fetch(apiUrl);
@@ -166,11 +162,9 @@ function HomeScreen({ route, navigation }) {
   }
 
   const loadMorePosts = () => {
-    console.log("Trying to laod more posts. LastID is " + lastPostID)
 
     fetchPosts(subredditName, lastPostID).then((newPosts) => {
       setPosts((prevPosts) => [...prevPosts, ...newPosts])
-      console.log("loadMoreposts last id: " + newPosts[newPosts.length - 1].name)
       setLastPostID(newPosts[newPosts.length - 1].name)
     })
   }
@@ -182,7 +176,7 @@ function HomeScreen({ route, navigation }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text>This is a header</Text>
+        <Text style={styles.subredditName}>r/{subredditName}</Text>
         <FlatList
           refreshing={isRefreshing}
           data={posts}
@@ -201,6 +195,11 @@ function HomeScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
+  },
+  subredditName: {
+    textAlign: "center",
+    fontSize: 20,
+    backgroundColor: "#ada9a9"
   },
   Title: {},
   authorAge: {

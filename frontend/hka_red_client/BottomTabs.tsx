@@ -1,7 +1,7 @@
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import SubredditSearchComponent from "./SubredditSearchComponent";
 import HomeScreen from "./HomeComponent";

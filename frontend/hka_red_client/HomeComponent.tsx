@@ -14,13 +14,22 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 function HomeScreen({ route, navigation }) {
   const { subredditName } = route.params;
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [lastPostID, setLastPostID] = useState(0)
+
+  const [lastLoadedPosts, setLastLoadedPosts] = useState([])
   const [posts, setPosts] = useState([]);
 
   const [upvotedPosts, setUpvotedPosts] = useState([]);
   const [downvotedPosts, setDownvotedPosts] = useState([]);
 
   useEffect(() => {
-    fetchPosts(subredditName);
+    fetchPosts(subredditName).then((loadedPosts) => {
+      setPosts(loadedPosts)
+      console.log(loadedPosts)
+      if(loadedPosts.length !== 0)
+        setLastPostID(loadedPosts[loadedPosts.length - 1].name)
+    })
   }, [subredditName]);
 
   const ItemView = ({ item }) => {
@@ -67,10 +76,12 @@ function HomeScreen({ route, navigation }) {
                 </Text>
                 <Text style={styles.Title}>{item.title}</Text>
               </View>
-              <Image
-                source={{ uri: item.thumbnail }}
-                style={styles.thumbnail}
-              ></Image>
+              {
+                item.thumbnail !== '' ? (              <Image
+                    source={{ uri: item.thumbnail }}
+                    style={styles.thumbnail}
+                ></Image>) : null
+              }
             </View>
             <View style={styles.postBottomPartContainer}>
               <View style={{ flexDirection: "row" }}>
@@ -109,36 +120,60 @@ function HomeScreen({ route, navigation }) {
     );
   };
 
-  const fetchPosts = (subredditName) => {
-    const apiUrl =
-      "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase();
 
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((json) => json.children)
-      .then((children) =>
-        children.map((child) => ({
-          author: child.author,
-          title: child.title,
-          subreddit: child.subreddit,
-          score: child.score,
-          permalink: child.permalink,
-          num_comments: child.num_comments,
-          subreddit_id: child.subreddit_id,
-          created: Math.trunc(
-            (Date.now() / 1000 - parseFloat(child.created)) / 60 / 60
-          ),
-          thumbnail:
-            "https://b.thumbs.redditmedia.com/bPmSoIk89dnWGWKrUmbzPfmgF4HA0yMJ6jDV2knTp7U.jpg",
-          name: child.name,
-        }))
-      )
-      .then((children) => setPosts(children))
-      .catch((error) => {
-        console.log(error);
-      });
 
+  const fetchPosts = async (subredditName: String, afterID?: number) => {
+    let apiUrl =
+        "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase() + "?limit=10";
+
+
+    if(typeof afterID !== 'undefined'){
+        apiUrl = apiUrl + "&after=" + afterID
+    }
+
+    console.log("url: " + apiUrl)
+
+    try {
+      const response = await fetch(apiUrl);
+      const json = await response.json();
+      const children = json.children.map((child) => ({
+        author: child.author,
+        title: child.title,
+        subreddit: child.subreddit,
+        score: child.score,
+        permalink: child.permalink,
+        num_comments: child.num_comments,
+        subreddit_id: child.subreddit_id,
+        created: Math.trunc(
+            (Date.now() / 1000 - parseFloat(child.created)) / 60 / 60),
+        thumbnail: child.thumbnail,
+        name: child.name,
+      }));
+
+      return children;
+    } catch (error) {
+      return [];
+    }
   };
+
+  const refreshPosts = () => {
+    setIsRefreshing(true)
+    fetchPosts(subredditName).then((loadedPosts) => {
+      setPosts(loadedPosts)
+      setLastPostID(loadedPosts[loadedPosts.length - 1].name)
+    })
+    setIsRefreshing(false)
+  }
+
+  const loadMorePosts = () => {
+    console.log("Trying to laod more posts. LastID is " + lastPostID)
+
+    fetchPosts(subredditName, lastPostID).then((newPosts) => {
+      setPosts((prevPosts) => [...prevPosts, ...newPosts])
+      console.log("loadMoreposts last id: " + newPosts[newPosts.length - 1].name)
+      setLastPostID(newPosts[newPosts.length - 1].name)
+    })
+  }
 
   const ItemSeperatorView = () => {
     return <View style={styles.itemSeparator} />;
@@ -149,10 +184,14 @@ function HomeScreen({ route, navigation }) {
       <View style={styles.container}>
         <Text>This is a header</Text>
         <FlatList
+          refreshing={isRefreshing}
           data={posts}
           keyExtractor={(item, index) => index.toString()}
           ItemSeparatorComponent={ItemSeperatorView}
           renderItem={ItemView}
+          onRefresh={() => refreshPosts()}
+          onEndReachedThreshold={0.5}
+          onEndReached={loadMorePosts}
         />
       </View>
     </View>

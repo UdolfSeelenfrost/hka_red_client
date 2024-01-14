@@ -123,7 +123,7 @@ function HomeScreen({ route, navigation }) {
 
   const fetchPosts = async (subredditName: String, afterID?: number) => {
     let apiUrl =
-        "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase() + "?limit=25";
+        "https://r-3l7bazumfq-ey.a.run.app/" + subredditName.toLowerCase() + "?limit=10";
 
     if(typeof afterID !== 'undefined'){
         apiUrl = apiUrl + "&after=" + afterID
